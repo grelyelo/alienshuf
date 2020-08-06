@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import requests
-from random import choice
+from random import sample
 import argparse
 import re
 
@@ -10,10 +10,12 @@ import re
 parser = argparse.ArgumentParser( description = "Returns a random link to an image from a given subreddit")
 parser.add_argument("subreddit", help="Subreddit to grab image from")
 parser.add_argument("--type", dest='filetype', help="Type of file to return" )
+parser.add_argument("--count", dest='count', default=1, help="Number of files to return (default 1)", type=int)
 
 ARGS = parser.parse_args()
 SUBREDDIT = ARGS.subreddit
 FILETYPE  = ARGS.filetype
+COUNT     = ARGS.count
 
 #If you want, you can change your user agent
 #This is useful if reddit bans you :)
@@ -27,7 +29,8 @@ def getPostUrls(count, subreddit, filetype=None):
     if( not subreddit.isalnum() ):
         return None
     
-    raw_response = requests.get("https://www.reddit.com/r/" + subreddit + "/hot/.json",
+    raw_response = requests.get(
+            "https://www.reddit.com/r/" + subreddit + "/hot/.json",
             params={"limit": str(count)},
             headers={"User-agent": USER_AGENT}
     )
@@ -42,13 +45,14 @@ def getPostUrls(count, subreddit, filetype=None):
         return url_list
 
 
-def printRandomUrl(count, subreddit, filetype=None):
+def printRandomUrls(count, subreddit, filetype=None, number=1):
     url_list = getPostUrls(count, subreddit, filetype)
 
     if len(url_list) > 0:
-        print(choice(url_list))
+        for s in sample(url_list, number):
+            print(s)
     else:
         print("")
 
-printRandomUrl(100, SUBREDDIT, FILETYPE)
+printRandomUrls(100, SUBREDDIT, filetype=FILETYPE, number=COUNT)
 
