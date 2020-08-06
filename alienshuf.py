@@ -35,7 +35,6 @@ def getPostUrls(count, subreddit, filetype=None):
     json_response= raw_response.json()
 
     url_list = [post['data']['url'] for post in json_response['data']['children'] if not post['data']['is_self'] ]
-    print("got %d urls" % len(url_list))
     if filetype is not None:
         regex = re.compile(r"%s$" % filetype)
         return list(filter(regex.search, url_list))
