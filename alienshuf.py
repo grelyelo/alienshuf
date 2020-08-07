@@ -55,8 +55,8 @@ def getPostUrls(subreddit,limit,sort,filetype=None):
     json_response= raw_response.json()
 
     url_list = [post['data']['url'] for post in json_response['data']['children'] if not post['data']['is_self'] ]
-    if filetype is not None:
-        regex = re.compile(r"%s$" % filetype)
+    if filetype is not None:   
+        regex = re.compile(r"\.%s$" % filetype)
         return list(filter(regex.search, url_list))
     else:
         return url_list
