@@ -9,13 +9,20 @@ import re
 
 parser = argparse.ArgumentParser( description = "Returns a random link to an image from a given subreddit")
 parser.add_argument("subreddit", help="Subreddit to grab image from")
-parser.add_argument("--type", dest='filetype', help="Type of file to return" )
-parser.add_argument("--count", dest='count', default=1, help="Number of files to return (default 1)", type=int)
+parser.add_argument("--type", "-t", dest='filetype', help="Type of file to return" )
+parser.add_argument("--count","-c", dest='count', default=1, help="Number of files to return (default 1)", type=int)
+parser.add_argument("--limit", "-l", dest='limit', default=25, help="Number of links to request from reddit (must be >= count), default 25", type=int)
+parser.add_argument("--sort", "-s", dest='sort', default="hot", help="How to sort subreddit when shuffling post")
 
 ARGS = parser.parse_args()
 SUBREDDIT = ARGS.subreddit
 FILETYPE  = ARGS.filetype
 COUNT     = ARGS.count
+LIMIT     = ARGS.limit
+SORT      = ARGS.sort
+
+VALID_SORTS = [ "hot", "top", "new" ]
+VALID_FILETYPES = [None, "jpg", "jpeg", "gif", "webm", "png"]
 
 #If you want, you can change your user agent
 #This is useful if reddit bans you :)
@@ -24,14 +31,24 @@ COUNT     = ARGS.count
 #Error 429 - Too Many Reqeusts
 USER_AGENT = "Alienshuf 1.0"
 
-def getPostUrls(count, subreddit, filetype=None):
+ERROR_BAD_ARGUMENT = "Error - one or more arguments are inconsistent or invalid"
+
+def validInput(args):
+    # Checks if input is valid, and returns True if so
+    # Returns false otherwise.
+    validLimit = args.limit >= args.count
+    validSort  = args.sort in VALID_SORTS
+    validFiletype = args.filetype in VALID_FILETYPES
+    return validLimit and validSort and validFiletype
+
+def getPostUrls(subreddit,limit,sort,filetype=None):
     # Returns count urls from subreddit as a list
     if( not subreddit.isalnum() ):
         return None
     
     raw_response = requests.get(
             "https://www.reddit.com/r/" + subreddit + "/hot/.json",
-            params={"limit": str(count)},
+            params={"limit": str(limit)},
             headers={"User-agent": USER_AGENT}
     )
     
@@ -44,15 +61,19 @@ def getPostUrls(count, subreddit, filetype=None):
     else:
         return url_list
 
-
-def printRandomUrls(count, subreddit, filetype=None, number=1):
-    url_list = getPostUrls(count, subreddit, filetype)
+def printRandomUrls(subreddit, count, limit, sort, filetype):
+    url_list = getPostUrls(subreddit, limit, sort, filetype)
 
     if len(url_list) > 0:
-        for s in sample(url_list, number):
+        for s in sample(url_list, count):
             print(s)
     else:
         print("")
 
-printRandomUrls(100, SUBREDDIT, filetype=FILETYPE, number=COUNT)
+def main():
+    if(validInput(ARGS)):
+        printRandomUrls(SUBREDDIT, COUNT, LIMIT, SORT, FILETYPE)
+    else:
+        print(ERROR_BAD_ARGUMENT)
 
+main()
