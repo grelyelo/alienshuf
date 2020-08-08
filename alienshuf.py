@@ -97,8 +97,14 @@ def printRandomUrls(subreddit, count, limit, sort, filetype=None, options=None, 
     url_list = getPostUrls(subreddit, limit, sort, filetype=filetype, options=options, debug=debug)
 
     if len(url_list) > 0:
-        for s in sample(url_list, count):
-            print(s)
+        if count <= len(url_list):
+            for s in sample(url_list, count):
+               print(s)
+        else:
+            if debug:
+                print("Warning: only got %d urls but user requested %d - printing all we have" % (len(url_list), count))
+            for s in url_list:
+                print(s)
     else:
         print("")
 
