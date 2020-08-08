@@ -35,14 +35,17 @@ def validInput(args):
     return validLimit and validSort and validFiletype
 
 def fixFiletype(filetype):
-    i = 0
-    while( i < len(filetype) and not filetype[i].isalnum() ):
-        i+=1
-    stringBegin = i
-    while( i < len(filetype) and filetype[i].isalnum() ):
-        i+=1
-    stringEnd = i
-    return filetype[stringBegin:stringEnd]
+    if filetype is not None:
+        i = 0
+        while( i < len(filetype) and not filetype[i].isalnum() ):
+            i+=1
+        stringBegin = i
+        while( i < len(filetype) and filetype[i].isalnum() ):
+            i+=1
+        stringEnd = i
+        return filetype[stringBegin:stringEnd]
+    else:
+        return None
 
 def getPostUrls(subreddit,limit,sort,filetype=None, debug=None):
     # Returns count urls from subreddit as a list
