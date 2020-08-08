@@ -14,13 +14,6 @@ parser.add_argument("--count","-c", dest='count', default=1, help="Number of fil
 parser.add_argument("--limit", "-l", dest='limit', default=25, help="Number of links to request from reddit (must be >= count), default 25", type=int)
 parser.add_argument("--sort", "-s", dest='sort', default="hot", help="How to sort subreddit when shuffling post")
 
-ARGS = parser.parse_args()
-SUBREDDIT = ARGS.subreddit
-FILETYPE  = ARGS.filetype
-COUNT     = ARGS.count
-LIMIT     = ARGS.limit
-SORT      = ARGS.sort
-
 VALID_SORTS = [ "hot", "top", "new" ]
 VALID_FILETYPES = [None, "jpg", "jpeg", "gif", "webm", "png"]
 
@@ -40,6 +33,16 @@ def validInput(args):
     validSort  = args.sort in VALID_SORTS
     validFiletype = args.filetype in VALID_FILETYPES
     return validLimit and validSort and validFiletype
+
+def fixFiletype(filetype):
+    i = 0
+    while( i < len(filetype) and not filetype[i].isalnum() ):
+        i+=1
+    stringBegin = i
+    while( i < len(filetype) and filetype[i].isalnum() ):
+        i+=1
+    stringEnd = i
+    return filetype[stringBegin:stringEnd]
 
 def getPostUrls(subreddit,limit,sort,filetype=None):
     # Returns count urls from subreddit as a list
@@ -70,9 +73,12 @@ def printRandomUrls(subreddit, count, limit, sort, filetype):
     else:
         print("")
 
+ARGS = parser.parse_args()
+ARGS.filetype = fixFiletype(ARGS.filetype) # fix the filetype
+
 def main():
     if(validInput(ARGS)):
-        printRandomUrls(SUBREDDIT, COUNT, LIMIT, SORT, FILETYPE)
+        printRandomUrls(ARGS.subreddit, ARGS.count, ARGS.limit, ARGS.sort, ARGS.filetype)
     else:
         print(ERROR_BAD_ARGUMENT)
 
