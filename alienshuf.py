@@ -13,7 +13,7 @@ parser.add_argument("--type", "-t", dest='filetype', help="Type of file to retur
 parser.add_argument("--count","-c", dest='count', default=1, help="Number of files to return (default 1)", type=int)
 parser.add_argument("--limit", "-l", dest='limit', default=25, help="Number of links to request from reddit (must be >= count), default 25", type=int)
 parser.add_argument("--sort", "-s", dest='sort', default="hot", help="How to sort subreddit when shuffling post")
-
+parser.add_argument("--debug", "-d", dest='debug', action='store_true', help="Enables debug mode and prints all debug messages")
 VALID_SORTS = [ "hot", "top", "new" ]
 VALID_FILETYPES = [None, "jpg", "jpeg", "gif", "webm", "png"]
 
@@ -44,7 +44,7 @@ def fixFiletype(filetype):
     stringEnd = i
     return filetype[stringBegin:stringEnd]
 
-def getPostUrls(subreddit,limit,sort,filetype=None):
+def getPostUrls(subreddit,limit,sort,filetype=None, debug=None):
     # Returns count urls from subreddit as a list
     if( not subreddit.isalnum() ):
         return None
@@ -54,7 +54,8 @@ def getPostUrls(subreddit,limit,sort,filetype=None):
             params={"limit": str(limit)},
             headers={"User-agent": USER_AGENT}
     )
-    
+    if debug:
+        print(raw_response.url)
     json_response= raw_response.json()
 
     url_list = [post['data']['url'] for post in json_response['data']['children'] if not post['data']['is_self'] ]
@@ -64,8 +65,8 @@ def getPostUrls(subreddit,limit,sort,filetype=None):
     else:
         return url_list
 
-def printRandomUrls(subreddit, count, limit, sort, filetype):
-    url_list = getPostUrls(subreddit, limit, sort, filetype)
+def printRandomUrls(subreddit, count, limit, sort, filetype=None, debug=False):
+    url_list = getPostUrls(subreddit, limit, sort, filetype=filetype, debug=debug)
 
     if len(url_list) > 0:
         for s in sample(url_list, count):
@@ -78,7 +79,7 @@ ARGS.filetype = fixFiletype(ARGS.filetype) # fix the filetype
 
 def main():
     if(validInput(ARGS)):
-        printRandomUrls(ARGS.subreddit, ARGS.count, ARGS.limit, ARGS.sort, ARGS.filetype)
+        printRandomUrls(ARGS.subreddit, ARGS.count, ARGS.limit, ARGS.sort, ARGS.filetype, ARGS.debug)
     else:
         print(ERROR_BAD_ARGUMENT)
 
