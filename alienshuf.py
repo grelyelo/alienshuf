@@ -50,7 +50,7 @@ def getPostUrls(subreddit,limit,sort,filetype=None):
         return None
     
     raw_response = requests.get(
-            "https://www.reddit.com/r/" + subreddit + "/hot/.json",
+            "https://www.reddit.com/r/" + subreddit + "/" + sort + "/.json",
             params={"limit": str(limit)},
             headers={"User-agent": USER_AGENT}
     )
